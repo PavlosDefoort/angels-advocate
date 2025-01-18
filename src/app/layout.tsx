@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Rowdies } from "next/font/google";
 import "./globals.css";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
-import NavBar from "../components/navbar";
+// import NavBar from "../components/navbar";
 
 const rowdies = Rowdies({
   subsets: ["latin"],
@@ -22,12 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={rowdies.className + " font-normal"}>
-      <UserProvider>
-        <body className="antialiased">
-          <NavBar />
-          {children}
-        </body>
-      </UserProvider>
+      <body className="antialiased">
+        {/* <NavBar /> */}
+        {children}
+      </body>
     </html>
   );
 }

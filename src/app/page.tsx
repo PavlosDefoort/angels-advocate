@@ -6,11 +6,5 @@ export default async function Home() {
   const session = await getSession();
   const user = session?.user;
   console.log(user);
-  return (
-    <div>
-      {/* <SidebarProvider>
-        <AppSidebar />
-      </SidebarProvider> */}
-    </div>
-  );
+  return <div></div>;
 }

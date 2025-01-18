@@ -2,21 +2,23 @@
 import { useState } from "react";
 import { createRoom } from "../../lib/roomutil";
 
-const CreateRoom = () => {
+const ShareRoom = () => {
   const [roomId, setRoomId] = useState<string | null>(null);
 
-  const handleCreateRoom = async () => {
+  const handleShareRoom = async () => {
     const id = await createRoom();
     setRoomId(id);
-    console.log("Room created, ID:", id);
+    const link = `${window.location.origin}/room/${id}`;
+    navigator.clipboard.writeText(link);
+    alert(`Room link copied: ${link}`);
   };
 
   return (
     <div>
-      <button onClick={handleCreateRoom}>Create Room</button>
+      <button onClick={handleShareRoom}>Create and Share Room</button>
       {roomId && <p>Room ID: {roomId}</p>}
     </div>
   );
 };
 
-export default CreateRoom;
+export default ShareRoom;

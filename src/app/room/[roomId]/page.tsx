@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 
-interface ChatPageProps {
-  topic: string;
-  userColour: string;
-}
+// interface ChatPageProps {
+//   topic?: string;
+//   userColour: string;
+// }
 
 interface Message {
   text: string;
@@ -15,9 +15,7 @@ interface Message {
   isControl?: boolean; // Attribute for control messages
 }
 
-export default function ChatPage({
-  topic = "Topic: AI Will Take Over Every Tech Job",
-}: ChatPageProps) {
+export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isUserTurn, setIsUserTurn] = useState(true);
@@ -161,7 +159,9 @@ export default function ChatPage({
         >
           ← Back
         </button>
-        <h1 className="flex-grow text-center text-3xl">{topic}</h1>
+        <h1 className="flex-grow text-center text-3xl">
+          {"Topic: AI Will Take Over Every Tech Job"}
+        </h1>
       </div>
 
       <div

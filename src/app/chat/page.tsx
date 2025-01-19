@@ -8,6 +8,7 @@ interface Message {
   text: string;
   isSelf: boolean;
   isGreen: boolean;
+  isNeutral?: boolean; // Optional attribute for control messages
 }
 
 export default function ChatPage({
@@ -27,13 +28,16 @@ export default function ChatPage({
   useEffect(() => {
     if (isUserGreen === null) return;
 
-    const initialMessage: Message = {
-      text: `Welcome! You're on the ${isUserGreen ? "green" : "red"} side.`,
-      isSelf: false,
-      isGreen: isUserGreen,
-    };
-    setMessages([initialMessage]);
-  }, [isUserGreen]);
+    // Add the initial message only once
+    if (messages.length === 0) {
+      const initialMessage: Message = {
+        text: `Welcome! You're on the ${isUserGreen ? "green" : "red"} side.`,
+        isSelf: false,
+        isGreen: isUserGreen,
+      };
+      setMessages([initialMessage]);
+    }
+  }, [isUserGreen, messages.length]);
 
   useEffect(() => {
     const selfMessagesCount = messages.filter((msg) => msg.isSelf).length;
@@ -52,6 +56,16 @@ export default function ChatPage({
         isGreen: !isUserGreen,
       };
       setMessages((prev) => [...prev, switchMessage]);
+
+      // Add the neutral message with buttons for game control
+      const controlMessage: Message = {
+        text: "Choose your action:",
+        isSelf: false,
+        isGreen: false,
+        isNeutral: true, // Indicating a neutral message for control options
+      };
+      setMessages((prev) => [...prev, controlMessage]);
+
       setLastSwitchCount(selfMessagesCount);
     }
   }, [messages, isUserGreen, lastSwitchCount]);
@@ -95,6 +109,27 @@ export default function ChatPage({
     }
   };
 
+  const handleControlAction = (action: string) => {
+    // Handle different game control actions (continue, handshake, bomb)
+    if (action === "continue") {
+      setMessages((prev) => {
+        return prev.filter((msg) => !msg.isNeutral); // Remove the neutral message
+      });
+      setIsUserTurn(true); // Allow the user to continue
+    } else {
+      // Implement end game logic for handshake or bomb
+      setMessages((prev) => [
+        ...prev,
+        {
+          text: `Game ended by ${action}.`,
+          isSelf: false,
+          isGreen: false,
+          isNeutral: true,
+        },
+      ]);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen w-screen">
       <div className="flex-none flex items-center justify-between h-20 px-5 bg-gray-300 text-black shadow-md z-10">
@@ -116,12 +151,20 @@ export default function ChatPage({
               <div
                 key={index}
                 className={`flex ${
-                  msg.isGreen ? "justify-end" : "justify-start"
+                  msg.isNeutral
+                    ? "justify-center" // Neutral messages should be centered
+                    : msg.isGreen
+                    ? "justify-end"
+                    : "justify-start"
                 }`}
               >
                 <div
                   className={`max-w-[70%] rounded-lg px-4 py-2 text-white ${
-                    msg.isGreen ? "bg-[#2E7D32]" : "bg-[#8B0000]"
+                    msg.isNeutral
+                      ? "bg-gray-400 text-black" // Neutral messages have a gray background
+                      : msg.isGreen
+                      ? "bg-[#2E7D32]"
+                      : "bg-[#8B0000]"
                   }`}
                 >
                   {msg.text}
@@ -132,6 +175,31 @@ export default function ChatPage({
           </div>
         </div>
       </div>
+
+      {messages.some((msg) => msg.isNeutral) && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-md">
+          <div className="flex space-x-4">
+            <button
+              onClick={() => handleControlAction("continue")}
+              className="px-5 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
+            >
+              Continue
+            </button>
+            <button
+              onClick={() => handleControlAction("handshake")}
+              className="px-5 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700"
+            >
+              Handshake
+            </button>
+            <button
+              onClick={() => handleControlAction("bomb")}
+              className="px-5 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700"
+            >
+              Bomb
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-md">
         <div

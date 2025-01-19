@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={rowdies.className + " font-normal"}>
+    <html lang="en" className={rowdies.className}>
       <body className="antialiased">
         {/* <NavBar /> */}
         {children}

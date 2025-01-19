@@ -7,15 +7,39 @@ import {
   signInWithPopup,
   signOut,
 } from "../lib/firebase";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { User } from "firebase/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [roomCode, setRoomCode] = useState<string>(""); // For the room code input
   const router = useRouter(); // To programmatically navigate
+  const [name, setName] = useState<string>("");
+  const [topic, setTopic] = useState<string>("");
+  const [isSearching, setIsSearching] = useState<boolean>(true);
 
   const handleLogin = async () => {
     try {
@@ -30,6 +54,8 @@ export default function Home() {
   const handleLogout = async () => {
     await signOut(auth);
     setUser(null);
+    // Refresh the page to clear the user state
+    router.refresh();
   };
 
   const handleJoinRoom = () => {
@@ -59,9 +85,53 @@ export default function Home() {
       {user && (
         <div className="flex-1 flex items-center justify-center bg-gray-100">
           <div className="w-1/2 flex flex-col items-center space-y-3">
-            <Button className="w-full mb-4" onClick={handleCreateRoom}>
-              Create New Debate Room
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="font-semibold">
+                  Create new Debate Room
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>New Room</DialogTitle>
+                  <DialogDescription>
+                    Create a new room to start a debate. Choose a name and
+                    topic.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right font-semibold">
+                      Name
+                    </Label>
+                    <Input
+                      id="name"
+                      value={name}
+                      className="col-span-3"
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="topic" className="text-right font-semibold">
+                      Topic
+                    </Label>
+                    <Input
+                      id="topic"
+                      value={topic}
+                      className="col-span-3"
+                      onChange={(e) => {
+                        // Topic can be max 140 characters
+                        if (e.target.value.length <= 140)
+                          setTopic(e.target.value);
+                      }}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit">Create!</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <p className="font-bold text-3xl">OR</p>
             <Input
               type="text"
@@ -70,7 +140,12 @@ export default function Home() {
               value={roomCode}
               onChange={(e) => setRoomCode(e.target.value)}
             />
-            <Button className="w-full mt-4" onClick={handleJoinRoom}>
+
+            <Button
+              className="w-full mt-4"
+              disabled={isSearching}
+              onClick={handleJoinRoom}
+            >
               Join Room
             </Button>
           </div>
@@ -126,10 +201,40 @@ export default function Home() {
           </button>
         )}
         {user && (
-          <Avatar>
-            <AvatarImage src={user.photoURL!} />
-            <AvatarFallback>{user.displayName?.[0]}</AvatarFallback>
-          </Avatar>
+          <div className="flex items-center space-x-4 pr-2">
+            <div className="flex flex-col">
+              <p className="text-xs">Currently signed in as </p>
+              <p>{user.displayName}</p>
+            </div>
+
+            <AlertDialog>
+              <AlertDialogTrigger>
+                {" "}
+                <Avatar className="cursor-pointer hover:opacity-50">
+                  <AvatarImage src={user.photoURL!} />
+                  <AvatarFallback>{user.displayName?.[0]}</AvatarFallback>
+                </Avatar>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Logout?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You are about to logout. Are you sure?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      handleLogout();
+                    }}
+                  >
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
       </nav>
     </div>

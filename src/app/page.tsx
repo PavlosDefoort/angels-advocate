@@ -249,6 +249,14 @@ export default function Home() {
         </div>
       </div>
 
+      <div className="absolute top-0 left-0 p-4">
+        <img
+          src="logo.png"
+          alt="Logo"
+          className="h-20"
+        />
+      </div>
+
       {/* Navigation buttons */}
       <nav className="absolute top-0 right-0 p-4 flex space-x-4">
         {!user && (

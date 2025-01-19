@@ -1,42 +1,27 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 
-// Define the interface for the room data
 interface RoomData {
   name: string;
   topic: string;
 }
 
 const Room = ({ roomId }: { roomId: string }) => {
-  const [roomData, setRoomData] = useState<RoomData | null>(null); // Type the state properly
+  const [roomData, setRoomData] = useState<RoomData | null>(null);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
       doc(db, "rooms", roomId),
       (docSnapshot) => {
-        console.log(docSnapshot);
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
-          // Add a null/undefined check for data properties before accessing them
-          if (
-            data &&
-            typeof data.name === "string" &&
-            typeof data.topic === "string"
-          ) {
-            setRoomData(data as RoomData); // Typecast the data to RoomData
-          } else {
-            console.error("Invalid room data format", data);
+          if (data?.name && data?.topic) {
+            setRoomData(data as RoomData);
           }
-        } else {
-          console.log("Room does not exist");
         }
       },
-      (error) => {
-        console.error("Error getting room data:", error);
-      }
+      (error) => console.error("Error getting room data:", error)
     );
 
     return () => unsubscribe();
@@ -45,9 +30,9 @@ const Room = ({ roomId }: { roomId: string }) => {
   if (!roomData) return <div>Loading...</div>;
 
   return (
-    <div>
-      <h1>Room: {roomData.name}</h1>
-      <p>Topic: {roomData.topic}</p>
+    <div className="p-4 border-b">
+      <h1 className="text-2xl font-bold">{roomData.name}</h1>
+      <p className="text-gray-600">{roomData.topic}</p>
     </div>
   );
 };

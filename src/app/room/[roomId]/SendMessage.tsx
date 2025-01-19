@@ -1,15 +1,15 @@
-"use client";
-
-import { useState } from "react";
-import { db } from "../../../lib/firebase";
+import React, { useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../../../lib/firebase";
 
 const SendMessage = ({
   roomId,
   userName,
+  isUserGreen,
 }: {
   roomId: string;
   userName: string;
+  isUserGreen: boolean;
 }) => {
   const [message, setMessage] = useState("");
 
@@ -17,33 +17,40 @@ const SendMessage = ({
     if (message.trim() === "") return;
 
     try {
-      // Add the message to Firestore
       await addDoc(collection(db, "rooms", roomId, "messages"), {
         text: message,
-        userName: userName,
-        createdAt: serverTimestamp(), // Store the time the message was sent
+        userName,
+        createdAt: serverTimestamp(),
+        isGreen: isUserGreen,
+        isSelf: true,
+        timestamp: Date.now(),
       });
-      setMessage(""); // Clear the input field after sending
+      setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
 
   return (
-    <div>
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type a message..."
-        className="border p-2 rounded"
-      />
-      <button
-        onClick={handleSend}
-        className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Send
-      </button>
+    <div className="p-4 border-t">
+      <div className="flex space-x-2">
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type a message..."
+          className="flex-1 border rounded-lg px-4 py-2"
+          onKeyPress={(e) => e.key === "Enter" && handleSend()}
+        />
+        <button
+          onClick={handleSend}
+          className={`px-6 py-2 rounded-lg text-white ${
+            isUserGreen ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 };

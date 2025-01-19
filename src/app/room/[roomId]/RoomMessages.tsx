@@ -4,7 +4,7 @@ import { db } from "../../../lib/firebase";
 
 interface Message {
   text: string;
-  isSelf: boolean;
+  userName: string;
   isGreen: boolean;
   timestamp: number;
   isNeutral?: boolean;
@@ -18,12 +18,18 @@ interface RoomMessagesProps {
   setIsUserGreen: Dispatch<SetStateAction<boolean>>;
 }
 
-const MessageBubble = ({ message }: { message: Message }) => {
+const MessageBubble = ({
+  message,
+  isUserMessage,
+}: {
+  message: Message;
+  isUserMessage: boolean;
+}) => {
   const bubbleStyle = message.isNeutral
     ? "bg-gray-200 mx-auto max-w-[80%] text-center"
-    : message.isGreen
-    ? "bg-green-500 text-white ml-auto"
-    : "bg-red-500 text-white mr-auto";
+    : `${message.isGreen ? "bg-green-500" : "bg-red-500"} text-white ${
+        isUserMessage ? "ml-auto" : "mr-auto"
+      }`;
 
   return (
     <div className={`rounded-lg p-3 my-2 max-w-[80%] ${bubbleStyle}`}>
@@ -51,8 +57,8 @@ const RoomMessages = ({
         const data = doc.data();
         return {
           text: data.text,
-          isSelf: data.userName === userName,
-          isGreen: data.userName === userName ? isUserGreen : !isUserGreen,
+          userName: data.userName,
+          isGreen: data.isGreen,
           timestamp: data.createdAt?.toMillis() || Date.now(),
           isNeutral: data.isNeutral,
           isControl: data.isControl,
@@ -62,13 +68,13 @@ const RoomMessages = ({
     });
 
     return () => unsubscribe();
-  }, [roomId, userName, isUserGreen]);
+  }, [roomId]);
 
   useEffect(() => {
     const messagesCount = messages.filter((msg) => !msg.isNeutral).length;
     if (
       messages.length > 1 &&
-      messagesCount % 8 === 0 &&
+      messagesCount % 4 === 0 &&
       messagesCount !== lastSwitchCount
     ) {
       setIsUserGreen((prev) => !prev);
@@ -76,8 +82,8 @@ const RoomMessages = ({
         text: `Switching sides! You're now on the ${
           !isUserGreen ? "proponent (green)" : "opponent (red)"
         } side.`,
-        isSelf: false,
-        isGreen: !isUserGreen,
+        userName: "system",
+        isGreen: true,
         isNeutral: true,
         timestamp: Date.now(),
       };
@@ -87,8 +93,8 @@ const RoomMessages = ({
       if (hasSwitched) {
         const controlMessage: Message = {
           text: "Choose your action:",
-          isSelf: false,
-          isGreen: false,
+          userName: "system",
+          isGreen: true,
           timestamp: Date.now(),
           isNeutral: true,
           isControl: true,
@@ -109,7 +115,11 @@ const RoomMessages = ({
   return (
     <div className="flex flex-col space-y-2 p-4 h-[600px] overflow-y-auto">
       {messages.map((message, index) => (
-        <MessageBubble key={index} message={message} />
+        <MessageBubble
+          key={index}
+          message={message}
+          isUserMessage={message.userName === userName}
+        />
       ))}
     </div>
   );

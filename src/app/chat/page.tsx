@@ -16,20 +16,33 @@ export default function ChatPage({
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isUserTurn, setIsUserTurn] = useState(true);
-  const [isUserGreen, setIsUserGreen] = useState(Math.random() < 0.5);
+  const [isUserGreen, setIsUserGreen] = useState<boolean | null>(null);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
+  const [lastSwitchCount, setLastSwitchCount] = useState(0);
 
   useEffect(() => {
+    setIsUserGreen(Math.random() < 0.5);
+  }, []);
+
+  useEffect(() => {
+    if (isUserGreen === null) return;
+
     const initialMessage: Message = {
       text: `Welcome! You're on the ${isUserGreen ? "green" : "red"} side.`,
       isSelf: false,
       isGreen: isUserGreen,
     };
     setMessages([initialMessage]);
-  }, []);
+  }, [isUserGreen]);
 
   useEffect(() => {
-    if (messages.length > 1 && (messages.length - 1) % 6 === 0) {
+    const selfMessagesCount = messages.filter((msg) => msg.isSelf).length;
+    /* switches sides every 4 messages sent by player */
+    if (
+      messages.length > 1 &&
+      selfMessagesCount % 4 === 0 &&
+      selfMessagesCount !== lastSwitchCount
+    ) {
       setIsUserGreen((prev) => !prev);
       const switchMessage: Message = {
         text: `Switching sides! You're now on the ${
@@ -39,8 +52,9 @@ export default function ChatPage({
         isGreen: !isUserGreen,
       };
       setMessages((prev) => [...prev, switchMessage]);
+      setLastSwitchCount(selfMessagesCount);
     }
-  }, [messages.length]);
+  }, [messages, isUserGreen, lastSwitchCount]);
 
   useEffect(() => {
     scrollToBottom();
@@ -52,6 +66,7 @@ export default function ChatPage({
 
   const handleSend = () => {
     if (!inputText.trim() || !isUserTurn) return;
+    if (isUserGreen === null) return;
 
     const newMessage = {
       text: `(your take) ${inputText.trim()}`,
@@ -119,14 +134,20 @@ export default function ChatPage({
       </div>
 
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-md">
-        <div className="flex items-center bg-green-700 p-3 rounded-lg shadow-lg">
+        <div
+          className={`flex items-center ${
+            isUserGreen ? "bg-[#2E7D32]" : "bg-[#8B0000]"
+          } p-3 rounded-lg shadow-lg`}
+        >
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your message..."
-            className="flex-1 text-white p-3 bg-green-700 border-none mr-3 focus:outline-none"
+            className={`flex-1 text-white p-3 ${
+              isUserGreen ? "bg-[#2E7D32]" : "bg-[#8B0000]"
+            } border-none mr-3 focus:outline-none`}
             disabled={!isUserTurn}
           />
           <button

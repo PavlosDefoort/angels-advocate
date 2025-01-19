@@ -41,9 +41,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import BackgroundCircles from "@/components/BackgroundCircles";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, setUser } = useAuth();
   const [roomCode, setRoomCode] = useState<string>(""); // For the room code input
   const router = useRouter(); // To programmatically navigate
   const [name, setName] = useState<string>("");
@@ -250,11 +251,7 @@ export default function Home() {
       </div>
 
       <div className="absolute top-0 left-0 p-4">
-        <img
-          src="logo.png"
-          alt="Logo"
-          className="h-20"
-        />
+        <img src="logo.png" alt="Logo" className="h-20" />
       </div>
 
       {/* Navigation buttons */}

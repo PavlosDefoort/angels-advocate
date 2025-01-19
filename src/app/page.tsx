@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // To redirect the user
 import {
   auth,
@@ -87,7 +87,10 @@ export default function Home() {
           <div className="w-1/2 flex flex-col items-center space-y-3">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" className="font-semibold">
+                <Button
+                  variant="outline"
+                  className="font-semibold hover:shadow-lg hover:shadow-black-500/50 transition duration-300 ease-in-out"
+                >
                   Create new Debate Room
                 </Button>
               </DialogTrigger>
@@ -164,7 +167,7 @@ export default function Home() {
       <nav className="absolute top-0 right-0 p-4 flex space-x-4">
         {!user && (
           <button
-            className="bg-gray-200 dark:bg-black dark:text-slate-100 inline-flex py-3 px-5 rounded-lg items-center hover:bg-gray-200 focus:outline-none"
+            className="bg-gray-200 dark:bg-black dark:text-slate-100 inline-flex py-3 px-5 rounded-lg items-center hover:bg-gray-200 focus:outline-none hover:shadow-lg hover:shadow-black-500/50 transition duration-300 ease-in-out"
             onClick={() => handleLogin()}
           >
             <svg

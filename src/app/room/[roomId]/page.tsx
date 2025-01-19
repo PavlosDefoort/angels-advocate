@@ -16,7 +16,7 @@ interface Message {
 }
 
 export default function ChatPage({
-  topic = "Default Topic: AI Will Take Over Every Tech Job",
+  topic = "Topic: AI Will Take Over Every Tech Job",
 }: ChatPageProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
@@ -36,7 +36,9 @@ export default function ChatPage({
     // Add the initial message only once
     if (messages.length === 0) {
       const initialMessage: Message = {
-        text: `Welcome! You're on the ${isUserGreen ? "green" : "red"} side.`,
+        text: `Welcome! You're on the ${
+          isUserGreen ? "proponent (green)" : "opponent (red)"
+        } side.`,
         isSelf: false,
         isGreen: isUserGreen,
         isNeutral: true,
@@ -57,7 +59,7 @@ export default function ChatPage({
       setIsUserGreen((prev) => !prev);
       const switchMessage: Message = {
         text: `Switching sides! You're now on the ${
-          !isUserGreen ? "green" : "red"
+          !isUserGreen ? "proponent (green)" : "opponent (red)"
         } side.`,
         isSelf: false,
         isGreen: !isUserGreen,
@@ -197,13 +199,13 @@ export default function ChatPage({
                         onClick={() => handleControlAction("handshake")}
                         className="px-5 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700"
                       >
-                        Handshake
+                        Handshake 🤝
                       </button>
                       <button
                         onClick={() => handleControlAction("bomb")}
                         className="px-5 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700"
                       >
-                        Bomb
+                        Bomb 💣
                       </button>
                     </div>
                   )}

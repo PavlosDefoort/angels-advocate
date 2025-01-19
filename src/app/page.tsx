@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation"; // To redirect the user
 import {
   auth,
@@ -135,8 +135,10 @@ export default function Home() {
 
         {/* Middle section with input */}
         {user && (
-          <div className="flex-1 flex items-center justify-center bg-gray-100"
-            style={{ zIndex: 30 }}>
+          <div
+            className="flex-1 flex items-center justify-center bg-gray-100"
+            style={{ zIndex: 30 }}
+          >
             <div className="w-1/2 flex flex-col items-center space-y-3">
               <Dialog>
                 <DialogTrigger asChild>

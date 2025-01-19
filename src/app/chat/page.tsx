@@ -9,6 +9,7 @@ interface Message {
   isSelf: boolean;
   isGreen: boolean;
   isNeutral?: boolean; // Optional attribute for control messages
+  isControl?: boolean; // Attribute for control messages
 }
 
 export default function ChatPage({
@@ -59,12 +60,13 @@ export default function ChatPage({
       };
       setMessages((prev) => [...prev, switchMessage]);
 
-      // Add the neutral message with buttons for game control
+      // Add the control message with buttons for game control
       const controlMessage: Message = {
         text: "Choose your action:",
         isSelf: false,
         isGreen: false,
         isNeutral: true, // Indicating a neutral message for control options
+        isControl: true, // Indicating this is a control message
       };
       setMessages((prev) => [...prev, controlMessage]);
 
@@ -123,7 +125,7 @@ export default function ChatPage({
       setMessages((prev) => [
         ...prev,
         {
-          text: `Game ended by ${action}.`,
+          text: `Debate ended by ${action}.`,
           isSelf: false,
           isGreen: false,
           isNeutral: true,
@@ -170,6 +172,23 @@ export default function ChatPage({
                   }`}
                 >
                   {msg.text}
+                  {/* Render control buttons if it's a control message */}
+                  {msg.isControl && (
+                    <div className="flex space-x-4 mt-2">
+                      <button
+                        onClick={() => handleControlAction("handshake")}
+                        className="px-5 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700"
+                      >
+                        Handshake
+                      </button>
+                      <button
+                        onClick={() => handleControlAction("bomb")}
+                        className="px-5 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700"
+                      >
+                        Bomb
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

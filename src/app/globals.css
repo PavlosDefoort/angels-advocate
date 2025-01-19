@@ -10,7 +10,8 @@ body.body-chat {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden; /* Prevent scrollbars */
+  overflow: hidden;
+  /* Prevent scrollbars */
 }
 
 @layer base {
@@ -49,6 +50,7 @@ body.body-chat {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -89,7 +91,44 @@ body.body-chat {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+.sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.7;
+  animation: floatUp infinite ease-in-out;
+}
+
+/* White sparkles */
+.white-sparkle {
+  background-color: white;
+}
+
+/* Black circles */
+.black-circle {
+  background-color: black;
+}
+
+/* Floating animation */
+@keyframes floatUp {
+  0% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-100vh);
+    opacity: 0;
   }
 }

@@ -132,3 +132,15 @@ body.body-chat {
     opacity: 0;
   }
 }
+
+.transition-bg {
+  transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+.bg-slide-left {
+  transform: translateX(-100%);
+}
+
+.bg-slide-right {
+  transform: translateX(100%);
+}

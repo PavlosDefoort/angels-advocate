@@ -133,7 +133,8 @@ export default function Home() {
 
         {/* middle section with input */}
         {user && (
-          <div className="flex-1 flex items-center justify-center bg-gray-100">
+          <div className="flex-1 flex items-center justify-center bg-gray-100"
+            style={{ zIndex: 30 }}>
             <div className="w-1/2 flex flex-col items-center space-y-3">
               <Dialog>
                 <DialogTrigger asChild>

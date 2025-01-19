@@ -1,16 +1,23 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
+import { getDatabase, ref, push, onChildAdded } from "firebase/database";
+import { realtimeDb } from "@/lib/firebase"
+
 interface ChatPageProps {
   topic: string;
+  userColour: string;
 }
 
 interface Message {
   text: string;
   isSelf: boolean;
   isGreen: boolean;
+  timestamp: number;
   isNeutral?: boolean; // Optional attribute for control messages
   isControl?: boolean; // Attribute for control messages
 }
+
+const db = getDatabase();
 
 export default function ChatPage({
   topic = "Default Topic: AI Will Take Over Every Tech Job",
@@ -21,6 +28,8 @@ export default function ChatPage({
   const [isUserGreen, setIsUserGreen] = useState<boolean | null>(null);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const [lastSwitchCount, setLastSwitchCount] = useState(0);
+  const [bgColor, setBgColor] = useState<string>(""); // Track background color
+
 
   useEffect(() => {
     setIsUserGreen(Math.random() < 0.5);
@@ -51,9 +60,8 @@ export default function ChatPage({
     ) {
       setIsUserGreen((prev) => !prev);
       const switchMessage: Message = {
-        text: `Switching sides! You're now on the ${
-          !isUserGreen ? "green" : "red"
-        } side.`,
+        text: `Switching sides! You're now on the ${!isUserGreen ? "green" : "red"
+          } side.`,
         isSelf: false,
         isGreen: !isUserGreen,
         isNeutral: true,
@@ -91,6 +99,8 @@ export default function ChatPage({
       isSelf: true,
       isGreen: isUserGreen,
     };
+
+    setBgColor(isUserGreen ? "bg-[#2E7D32]" : "bg-[#8B0000]");
     setMessages((prev) => [...prev, newMessage]);
     setInputText("");
     setIsUserTurn(false);
@@ -146,30 +156,29 @@ export default function ChatPage({
         <h1 className="flex-grow text-center text-3xl">{topic}</h1>
       </div>
 
-      <div className="flex-1 flex relative overflow-hidden">
-        <div className="absolute w-1/2 h-full left-0 bg-[#FAA2A2]"></div>
-        <div className="absolute w-1/2 h-full right-0 bg-[#7CCD85]"></div>
+      <div
+        className={`flex-1 flex relative overflow-hidden transition-all duration-500 ${isUserGreen === false ? "bg-[#da7b7b]" : "bg-[#7CCD85]"
+          }`}
+      >
         <div className="relative w-full h-full overflow-y-auto px-4">
           <div className="flex flex-col space-y-4 py-4 mb-24">
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex ${
-                  msg.isNeutral
-                    ? "justify-center" // Neutral messages should be centered
-                    : msg.isGreen
+                className={`flex ${msg.isNeutral
+                  ? "justify-center" // Neutral messages should be centered
+                  : msg.isGreen
                     ? "justify-end"
                     : "justify-start"
-                }`}
+                  }`}
               >
                 <div
-                  className={`max-w-[70%] rounded-lg px-4 py-2 text-white ${
-                    msg.isNeutral
-                      ? "bg-gray-400 text-black" // Neutral messages have a gray background
-                      : msg.isGreen
+                  className={`max-w-[70%] rounded-lg px-4 py-2 text-white ${msg.isNeutral
+                    ? "bg-gray-400 text-black" // Neutral messages have a gray background
+                    : msg.isGreen
                       ? "bg-[#2E7D32]"
                       : "bg-[#8B0000]"
-                  }`}
+                    }`}
                 >
                   {msg.text}
                   {/* Render control buttons if it's a control message */}
@@ -224,9 +233,8 @@ export default function ChatPage({
 
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-md">
         <div
-          className={`flex items-center ${
-            isUserGreen ? "bg-[#2E7D32]" : "bg-[#8B0000]"
-          } p-3 rounded-lg shadow-lg`}
+          className={`flex items-center ${isUserGreen ? "bg-[#2E7D32]" : "bg-[#8B0000]"
+            } p-3 rounded-lg shadow-lg`}
         >
           <input
             type="text"
@@ -234,9 +242,8 @@ export default function ChatPage({
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your message..."
-            className={`flex-1 text-white p-3 ${
-              isUserGreen ? "bg-[#2E7D32]" : "bg-[#8B0000]"
-            } border-none mr-3 focus:outline-none`}
+            className={`flex-1 text-white p-3 ${isUserGreen ? "bg-[#2E7D32]" : "bg-[#8B0000]"
+              } border-none mr-3 focus:outline-none`}
             disabled={!isUserTurn}
           />
           <button

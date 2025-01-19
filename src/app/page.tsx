@@ -3,10 +3,17 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // To redirect the user
 import {
   auth,
+  db,
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
 } from "../lib/firebase";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +39,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -40,6 +48,7 @@ export default function Home() {
   const [name, setName] = useState<string>("");
   const [topic, setTopic] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(true);
+  const [isWrong, setIsWrong] = useState<boolean>(false);
 
   const handleLogin = async () => {
     try {
@@ -59,16 +68,54 @@ export default function Home() {
   };
 
   const handleJoinRoom = () => {
+    console.log(roomCode);
     if (roomCode) {
       // Redirect to the room page with the room code
       router.push(`/room/${roomCode}`);
     }
   };
 
-  const handleCreateRoom = () => {
-    // Create a unique room ID or generate one (e.g., using UUID)
-    const newRoomId = Math.random().toString(36).substr(2, 9); // For example
-    router.push(`/room/${newRoomId}`);
+  const handleCreateRoom = async () => {
+    try {
+      // Generate a unique room ID
+      const roomCode = Math.random().toString(36).substring(2, 10);
+
+      // Create the room object to store in Firestore
+      const roomData = {
+        name: name.trim() || "Untitled Room", // Use entered name or default value
+        topic: topic.trim() || "General", // Use entered topic or default value
+        createdBy: user?.uid, // Current user's UID
+        createdAt: new Date().toISOString(), // Timestamp
+      };
+
+      // Add the room to Firestore
+      await setDoc(doc(db, "rooms", roomCode), roomData);
+
+      // Redirect to the room page
+      router.push(`/room/${roomCode}`);
+    } catch (error) {
+      console.error("Error creating room:", error);
+    }
+  };
+
+  const handleOTPComplete = async (otp: string) => {
+    try {
+      const roomCode = otp; // The full OTP entered by the user
+      const roomDoc = await getDoc(doc(db, "rooms", roomCode));
+
+      if (roomDoc.exists()) {
+        // If the room exists, navigate to the room page
+        setIsSearching(false);
+        setRoomCode(roomCode);
+        // router.push(`/room/${roomCode}`);
+      } else {
+        // If the room doesn't exist, notify the user
+        // alert("Room does not exist. Please check the code and try again.");
+        setIsWrong(true);
+      }
+    } catch (error) {
+      console.error("Error verifying room code:", error);
+    }
   };
 
   return (
@@ -89,7 +136,7 @@ export default function Home() {
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="font-semibold hover:shadow-lg hover:shadow-black-500/50 transition duration-300 ease-in-out"
+                  className="bg-blue-500 hover:bg-blue-600 text-white hover:text-white font-semibold hover:shadow-lg hover:shadow-black-500/50 transition duration-300 ease-in-out"
                 >
                   Create new Debate Room
                 </Button>
@@ -110,7 +157,8 @@ export default function Home() {
                     <Input
                       id="name"
                       value={name}
-                      className="col-span-3"
+                      className="col-span-3 shadow-sm"
+                      placeholder="Who's debating?"
                       onChange={(e) => setName(e.target.value)}
                     />
                   </div>
@@ -121,7 +169,8 @@ export default function Home() {
                     <Input
                       id="topic"
                       value={topic}
-                      className="col-span-3"
+                      placeholder="Max 140 characters"
+                      className="col-span-3 shadow-sm"
                       onChange={(e) => {
                         // Topic can be max 140 characters
                         if (e.target.value.length <= 140)
@@ -131,23 +180,49 @@ export default function Home() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Create!</Button>
+                  <Button type="submit" onClick={() => handleCreateRoom()}>
+                    Create!
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
             <p className="font-bold text-3xl">OR</p>
-            <Input
+            {/* <Input
               type="text"
               placeholder="Enter room code"
               className="w-full p-3 text-xl border rounded-lg"
               value={roomCode}
               onChange={(e) => setRoomCode(e.target.value)}
-            />
+            /> */}
+            <div className="p-4 bg-gray-50 rounded-lg shadow-md">
+              <Label htmlFor="room-code" className="font-semibold">
+                Enter room code
+              </Label>
+              <InputOTP maxLength={8} onComplete={(e) => handleOTPComplete(e)}>
+                <InputOTPGroup className="">
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                </InputOTPGroup>
+                <InputOTPSeparator />
+                <InputOTPGroup>
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                  <InputOTPSlot index={6} />
+                  <InputOTPSlot index={7} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+            {isWrong && (
+              <p className="text-red-500 text-sm">Room does not exist.</p>
+            )}
 
             <Button
+              variant={"default"}
               className="w-full mt-4"
               disabled={isSearching}
-              onClick={handleJoinRoom}
+              onClick={() => handleJoinRoom()}
             >
               Join Room
             </Button>

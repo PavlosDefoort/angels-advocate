@@ -113,7 +113,11 @@ const RoomMessages = ({
   ]);
 
   return (
-    <div className="flex flex-col space-y-2 p-4 h-[600px] overflow-y-auto">
+    <div
+      className={`flex flex-col space-y-2 p-4 h-[600px] overflow-y-auto ${
+        isUserGreen ? "bg-green-300" : "bg-red-300"
+      }`}
+    >
       {messages.map((message, index) => (
         <MessageBubble
           key={index}

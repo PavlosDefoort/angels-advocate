@@ -26,10 +26,8 @@ const MessageBubble = ({
   isUserMessage: boolean;
 }) => {
   const bubbleStyle = message.isNeutral
-    ? "bg-gray-200 mx-auto max-w-[80%] text-center"
-    : `${message.isGreen ? "bg-green-500" : "bg-red-500"} text-white ${
-        isUserMessage ? "ml-auto" : "mr-auto"
-      }`;
+    ? "bg-gray-200 text-center"
+    : `${message.isGreen ? "bg-green-500" : "bg-red-500"} text-white`;
 
   return (
     <div className={`rounded-lg p-3 my-2 max-w-[80%] ${bubbleStyle}`}>
@@ -114,17 +112,29 @@ const RoomMessages = ({
 
   return (
     <div
-      className={`flex flex-col space-y-2 p-4 h-[600px] overflow-y-auto ${
-        isUserGreen ? "bg-green-300" : "bg-red-300"
+      className={`relative w-full h-[600px] overflow-y-auto px-36 ${
+        isUserGreen ? "bg-green-200" : "bg-red-200"
       }`}
     >
-      {messages.map((message, index) => (
-        <MessageBubble
-          key={index}
-          message={message}
-          isUserMessage={message.userName === userName}
-        />
-      ))}
+      <div className="flex flex-col space-y-4 py-4 mb-24">
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`flex ${
+              message.isNeutral
+                ? "justify-center"
+                : message.isGreen
+                ? "justify-end"
+                : "justify-start"
+            }`}
+          >
+            <MessageBubble
+              message={message}
+              isUserMessage={message.userName === userName}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

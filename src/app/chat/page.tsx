@@ -34,18 +34,19 @@ export default function ChatPage({
         text: `Welcome! You're on the ${isUserGreen ? "green" : "red"} side.`,
         isSelf: false,
         isGreen: isUserGreen,
+        isNeutral: true,
       };
       setMessages([initialMessage]);
     }
   }, [isUserGreen, messages.length]);
 
   useEffect(() => {
-    const selfMessagesCount = messages.filter((msg) => msg.isSelf).length;
+    const messagesCount = messages.filter((msg) => !msg.isNeutral).length;
     /* switches sides every 4 messages sent by player */
     if (
       messages.length > 1 &&
-      selfMessagesCount % 4 === 0 &&
-      selfMessagesCount !== lastSwitchCount
+      messagesCount % 8 === 0 &&
+      messagesCount !== lastSwitchCount
     ) {
       setIsUserGreen((prev) => !prev);
       const switchMessage: Message = {
@@ -54,6 +55,7 @@ export default function ChatPage({
         } side.`,
         isSelf: false,
         isGreen: !isUserGreen,
+        isNeutral: true,
       };
       setMessages((prev) => [...prev, switchMessage]);
 
@@ -66,7 +68,7 @@ export default function ChatPage({
       };
       setMessages((prev) => [...prev, controlMessage]);
 
-      setLastSwitchCount(selfMessagesCount);
+      setLastSwitchCount(messagesCount);
     }
   }, [messages, isUserGreen, lastSwitchCount]);
 
@@ -146,7 +148,7 @@ export default function ChatPage({
         <div className="absolute w-1/2 h-full left-0 bg-[#FAA2A2]"></div>
         <div className="absolute w-1/2 h-full right-0 bg-[#7CCD85]"></div>
         <div className="relative w-full h-full overflow-y-auto px-4">
-          <div className="flex flex-col space-y-4 py-4">
+          <div className="flex flex-col space-y-4 py-4 mb-24">
             {messages.map((msg, index) => (
               <div
                 key={index}
